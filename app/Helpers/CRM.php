@@ -388,7 +388,7 @@ class CRM
         if ($token) {
             $company = $token;
         } else {
-            $rec['user_id'] = $company_id;
+            $rec['company_id'] = $company_id;
             $company = self::getCrmToken($rec);
             // $company = self::getCrmToken($company_id);
         }

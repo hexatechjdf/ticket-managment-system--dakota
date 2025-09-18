@@ -47,12 +47,6 @@
                                     placeholder="Enter GHL Secret ID"
                                     value="{{ get_default_settings('crm_client_secret') }}">
                             </div>
-                            <div class="mb-3">
-                                <label for="ghl_api_url" class="form-label">API URL</label>
-                                <input type="url" class="form-control" id="ghl_api_url" name="ghl_api_url"
-                                    placeholder="https://services.leadconnectorhq.com"
-                                    value="{{ get_default_settings('ghl_api_url') }}">
-                            </div>
                         </div>
                     </div>
                 </div>
@@ -77,23 +71,57 @@
                                     placeholder="Enter LiveAgent API Key"
                                     value="{{ get_default_settings('la_api_key') }}">
                             </div>
-                            <div class="mb-3">
-                                <label for="la_email" class="form-label">Agent Email</label>
-                                <input type="email" class="form-control" id="la_email" name="la_email"
-                                    placeholder="admin@company.com"
-                                    value="{{ get_default_settings('la_email') }}">
+                        </div>
+                    </div>
+                </div>
+
+
+
+                <div class="col-lg-12 mb-4">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">
+                               <i class="bi bi-chat-square-text me-2"></i>Alert Messages
+                            </h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="contact_message" class="form-label">Contact Administration Message</label>
+                                    <input type="text" class="form-control" id="contact_message" name="contact_message"
+                                        placeholder="Contact Administration Message"
+                                        value="{{ get_default_settings('contact_message') }}">
+                                </div>
+                                <div class="col-md-6 mb-3">
+                                    <label for="under_config_message" class="form-label">Under Configuration Message</label>
+                                    <input type="text" class="form-control" id="under_config_message" name="under_config_message"
+                                        placeholder="Enter Under Configuration Message"
+                                        value="{{ get_default_settings('under_config_message') }}">
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="inactive_message" class="form-label">In Active Account Message</label>
+                                    <input type="text" class="form-control" id="inactive_message" name="inactive_message"
+                                        placeholder="Enter In Active Account Message"
+                                        value="{{ get_default_settings('inactive_message') }}">
+                                </div>
+                                {{-- Add more here if needed --}}
                             </div>
                         </div>
                     </div>
                 </div>
+
+
+
             </div>
 
             <!-- Action buttons -->
             <div class="form-group mt-3">
                 <div class="row">
                     <div class="col-6">
-                        <button type="submit" class="btn btn-primary w-100 text-light px-4 mt-3 mb-0"
-                           >Save</button>
+                        <button type="submit" class="btn btn-primary w-100 text-light px-4 mt-3 mb-0">Save</button>
                     </div>
                     <div class="col-6">
                         <a href="{{ route('agency.index') }}"

@@ -111,13 +111,13 @@
 
 <!-- Messages Modal -->
 <div class="modal fade" id="messagesModal" tabindex="-1" aria-labelledby="messagesModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-fullscreen modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="messagesModalLabel">Ticket Messages</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" style="max-height: 60vh; overflow-y: auto;">
+            <div class="modal-body" style="overflow-y: auto;">
                 <div class="d-flex justify-content-center" id="loadingSpinner">
                     <div class="spinner-border text-primary" role="status">
                         <span class="visually-hidden">Loading...</span>
@@ -283,8 +283,8 @@
                 })
                 .then(result => {
                     console.log('Data received:', result);
-                    function triggerModal(obj){
-                         Swal.fire({
+                    function triggerModal(obj) {
+                        Swal.fire({
                             ...obj,
                             confirmButtonText: 'OK',
                             showConfirmButton: false,
@@ -296,12 +296,11 @@
                     }
                     //let statuses = result.statuses;
 
-                    if ( [2,4].includes(result.activeStatus) ) {
+                    if ([2, 4].includes(result.activeStatus)) {
                         triggerModal({
                             icon: 'error',
                             title: 'Access Denied',
-
-                            html: '<strong>Your account is disabled.</strong><br>Contact administrator.'
+                            html: `<strong>{{ get_default_settings('inactive_message') }}</strong><br>{{ get_default_settings('contact_message') }}`
 
                         });
                         return;
@@ -309,7 +308,7 @@
                         triggerModal({
                             icon: 'info',
                             title: 'Account under configuration',
-                            html: '<strong>Your account is in maintenance mode.</strong><br>Contact administrator.'
+                            html: `<strong>{{ get_default_settings('under_config_message') }}</strong><br>{{ get_default_settings('contact_message') }}`
 
                         });
                         return;
@@ -401,7 +400,7 @@
                 const messagesContainer = $('<div class="messages p-3"></div>');
 
                 if (group.messages && group.messages.length > 0) {
-                    group.messages.filter(t=>['I','M','S'].includes(t.type)).forEach(message => {
+                    group.messages.filter(t => ['I', 'M', 'S'].includes(t.type)).forEach(message => {
                         const messageClass = message.type === 'M' ? 'alert alert-info' : 'alert alert-secondary';
                         const messageElement = `
                         <div class="${messageClass} mb-2">

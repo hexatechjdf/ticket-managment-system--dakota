@@ -46,7 +46,6 @@ class DashboardController extends Controller
     }
     public function index(Request $request)
     {
-        $companyId = 'oEEb4PRxpIyxEV1LxLea';
         list($status, $departmentId)  = $this->verifyUser($request);
 
         if ($status == 2) {
@@ -56,24 +55,7 @@ class DashboardController extends Controller
         $departmentId =  null;
         $departmentName =  'Unknown';
 
-
-
-        // 🔹 Status labels
-        $statuses = [
-            'I' => 'Init',
-            'N' => 'New',
-            'T' => 'Chatting',
-            'P' => 'Calling',
-            'R' => 'Resolved',
-            'X' => 'Deleted',
-            'B' => 'Spam',
-            'A' => 'Answered',
-            'C' => 'Open',
-            'W' => 'Postponed',
-            'L' => 'Closed'
-        ];
-
-
+        $statuses = $this->statuses();
         $today = $this->getDate(today()->copy()->startOfMonth());
         $endDateString = $this->getDate(today());
         return view('user.dashboard', [
@@ -91,7 +73,43 @@ class DashboardController extends Controller
         ]);
     }
 
-    public function getDate($date){
+    private function statuses()
+    {
+        return [
+            'I' => 'Init',
+            'N' => 'New',
+            'T' => 'Chatting',
+            'P' => 'Calling',
+            'R' => 'Resolved',
+            'X' => 'Deleted',
+            'B' => 'Spam',
+            'A' => 'Answered',
+            'C' => 'Open',
+            'W' => 'Postponed',
+            'L' => 'Closed'
+        ];
+    }
+
+    private function channel_types()
+    {
+        return [
+            'E' => 'email',
+            'B' => 'contact button',
+            'M' => 'contact form',
+            'I' => 'invitation',
+            'C' => 'call',
+            'W' => 'call button',
+            'F' => 'facebook',
+            'A' => 'facebook message',
+            'T' => 'twitter',
+            'Q' => 'forum',
+            'S' => 'suggestion*',
+        ];
+    }
+
+
+    public function getDate($date)
+    {
         return $date->format('Y-m-d');
     }
     public function getTickets(Request $request)
@@ -101,28 +119,13 @@ class DashboardController extends Controller
         // 🔹 For DataTable AJAX
         if ($request->ajax()) {
 
-
-
             list($status, $departmentId)  = $this->verifyUser($request);
+            $statuses = $this->statuses();
 
-
-
-            $statuses = [
-                'I' => 'Init',
-                'N' => 'New',
-                'T' => 'Chatting',
-                'P' => 'Calling',
-                'R' => 'Resolved',
-                'X' => 'Deleted',
-                'B' => 'Spam',
-                'A' => 'Answered',
-                'C' => 'Open',
-                'W' => 'Postponed',
-                'L' => 'Closed'
-            ];
+            $channel_types = $this->channel_types();
             $today = today();
             $startDateString = $this->getDate($today->copy()->startOfMonth());
-            $resolvedStart = $request->resolved_start ??$startDateString ;
+            $resolvedStart = $request->resolved_start ?? $startDateString;
             $resolvedEnd   = $request->resolved_end ?? $this->getDate($today);
             $filters[] = ["status", "E", "L"];
             $filters[] = ["departmentid", "E", $departmentId];
@@ -140,11 +143,12 @@ class DashboardController extends Controller
                 $allTickets  = collect([]);
             }
 
-
-
             return DataTables::of($allTickets)
                 ->editColumn('status', function ($ticket) use ($statuses) {
                     return $statuses[$ticket['status']] ?? $ticket['status'];
+                })
+                ->editColumn('channel_type', function ($ticket) use ($channel_types) {
+                    return $channel_types[$ticket['channel_type']] ?? $ticket['channel_type'];
                 })
                 ->addColumn('actions', function ($ticket) {
                     return '<button class="btn btn-sm btn-info view-messages" data-ticket-id="' . $ticket['id'] . '">Messages</button>';
@@ -161,26 +165,12 @@ class DashboardController extends Controller
 
         list($statusUser, $departmentId)  = $this->verifyUser($request);
         $status        = $request->status ?? null;
-        $startDate     = $request->start_date ??$this->getDate( $today->copy()->startOfMonth());
+        $startDate     = $request->start_date ?? $this->getDate($today->copy()->startOfMonth());
         $endDate       = $request->end_date ?? $this->getDate($today);
         $resolvedStart = $request->resolved_start ?? $today;
         $resolvedEnd   = $request->resolved_end ?? $today;
 
-        // 🔹 Status labels
-
-        $statuses = [
-            'I' => 'Init',
-            'N' => 'New',
-            'T' => 'Chatting',
-            'P' => 'Calling',
-            'R' => 'Resolved',
-            'X' => 'Deleted',
-            'B' => 'Spam',
-            'A' => 'Answered',
-            'C' => 'Open',
-            'W' => 'Postponed',
-            'L' => 'Closed'
-        ];
+        $statuses = $this->statuses();
         // Build filters
 
         $filters = [];
@@ -237,7 +227,7 @@ class DashboardController extends Controller
             ];
 
             $allMessages = $this->fetchPaginatedData("tickets/{$ticketId}/messages", $params, 100);
-
+            // dD($allMessages);
             return response()->json([
                 'success'  => true,
                 'messages' => $allMessages

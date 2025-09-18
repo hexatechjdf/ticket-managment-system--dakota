@@ -8,6 +8,7 @@ use App\Models\CrmToken;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Artisan;
+use stdClass;
 
 class CRMConnectionController extends Controller
 {
@@ -25,7 +26,7 @@ class CRMConnectionController extends Controller
 
             $code = json_decode($code);
             $companyId = $code->companyId;
-            $crmToekn = CrmToken::where('company_id', $companyId)->first();
+            $crmToken = CrmToken::where('company_id', $companyId)->first();
 
             $user_type = $code->userType ?? null;
 
@@ -35,6 +36,18 @@ class CRMConnectionController extends Controller
                 $token = $user->token ?? null;
                 list($connected, $con) = CRM::go_and_get_token($code, '', $user_id, $token);
                 if ($connected) {
+                    $companyData = CRM::agencyV2($companyId, 'companies/' . $companyId);
+                    if ($companyData && property_exists($companyData, 'company')) {
+                        $companyData = $companyData->company;
+                        $detail = new stdClass;
+                        $detail->name = $companyData->name;
+                        $detail->email = $companyData->email;
+                        $detail->timezone = $companyData->timezone;
+                        $detail->phone = $companyData->phone;
+                        $detail = json_encode($detail);
+                        $crmToken->meta = $detail;
+                        $crmToken->save();
+                    }
                     // $this->authService->getCompany(auth()->user());
                     return redirect($main)->with('success', 'Connected Successfully');
                 }

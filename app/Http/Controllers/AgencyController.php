@@ -41,7 +41,9 @@ class AgencyController extends Controller
                     if (!$connected_agency) {
                         return 'Not Yet Connected';
                     }
-                    return $connected_agency->company_id;
+                    $meta = $connected_agency->meta;
+                    $meta = json_decode($meta);
+                    return $meta->name . ' - ' . $meta->email;
                 })
 
                 ->editColumn('is_configured', function ($row) {
@@ -98,37 +100,31 @@ class AgencyController extends Controller
     {
         $allDepartments = [];
         $page = 1;
-        $perPage = 250; // Number of departments to fetch per API call
+        $perPage = 250;
 
-        // Get IDs of departments that are already assigned
         $assignedIds = AssignedDepartment::pluck('department_id')->map(function ($id) {
             return (string) $id;
         })->toArray();
 
         while (true) {
-            // Fetch a page of departments from the API
             $response = LiveAgentApi::request('GET', 'departments', [
                 '_page'    => $page,
                 '_perPage' => $perPage,
             ]);
 
-            // Break the loop if the API call fails or returns no data
             if (!$response['success'] || empty($response['data'])) {
                 break;
             }
 
-            // Filter out already assigned departments from the current chunk
             $availableDepartments = array_filter($response['data'], function ($dept) use ($assignedIds) {
-                // Ensure department_id exists before checking
                 return isset($dept['department_id']) && !in_array((string) $dept['department_id'], $assignedIds, true);
             });
 
-            // Format and add the available departments to our list
             foreach ($availableDepartments as $dept) {
                 $name  = (string) ($dept['name'] ?? 'Unknown');
                 $depId = (string) ($dept['department_id'] ?? '');
 
-                if ($depId) { // Only add departments with an ID
+                if ($depId) {
                     $allDepartments[] = [
                         'id'   => $name . '|' . $depId,
                         'text' => $name,
@@ -136,68 +132,14 @@ class AgencyController extends Controller
                 }
             }
 
-            // If the number of returned departments is less than the perPage limit,
-            // it means we have reached the last page.
             if (count($response['data']) < $perPage) {
                 break;
             }
-
-            // Move to the next page
             $page++;
         }
 
         return response()->json($allDepartments);
     }
-
-
-
-    // public function getDepartmentsForAssignment(Request $request)
-    // {
-    //     $page = $request->input('page', 1);
-    //     $perPage = 250;
-
-    //     $response = $this->getDepartments($page, $perPage);
-
-    //     if (!$response['success']) {
-    //         return response()->json([
-    //             'results' => [],
-    //             'pagination' => ['more' => false],
-    //         ]);
-    //     }
-
-    //     // Pluck only depId (not "name|depId")
-    //     $assignedIds = AssignedDepartment::pluck('department_id')->toArray();
-    //     // $assignedIds = [];
-
-    //     // Filter out already assigned departments
-    //     $availableDepartments = array_filter($response['data'], function ($dept) use ($assignedIds) {
-    //         return !in_array((string) $dept['department_id'], $assignedIds, true);
-    //     });
-
-    //     $results = array_map(function ($dept) {
-    //         $name  = (string) ($dept['name'] ?? '');
-    //         $depId = (string) ($dept['department_id'] ?? '');
-
-    //         return [
-    //             'id'   => $name . '|' . $depId, // always string
-    //             'text' => $name,                // label for select2
-    //         ];
-    //     }, $availableDepartments);
-
-    //     return response()->json([
-    //         'results' => collect($results)->values()->all(),
-    //         'pagination' => [
-    //             'more' => count($response['data']) === $perPage,
-    //         ],
-    //     ]);
-    // }
-
-    // public function getDepartments($page = 1, $perPage = 100)
-    // {
-    //     $response = LiveAgentApi::request('GET', 'departments', ['_page'    => $page,'_perPage' => $perPage ]);
-
-    //     return $response;
-    // }
 
 
     /**
@@ -212,6 +154,7 @@ class AgencyController extends Controller
             'email' => 'required|email|unique:users,email,' . ($user->id ?? 'NULL'),
             'is_active' => 'required|boolean',
             'is_configured' => 'required|boolean',
+            'department_id' => 'required',
         ]);
 
         $user->name = $request->name;
@@ -238,6 +181,10 @@ class AgencyController extends Controller
         $assignedDepartment->department_id = $depId;
         $assignedDepartment->user_id = $userId;
         $assignedDepartment->save();
+        if (!$assignedDepartment) {
+            $user->is_configured = 0;
+            $user->save();
+        }
         $message = $id ? 'Agency updated successfully.' : 'Agency created successfully.';
 
 
