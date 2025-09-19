@@ -778,7 +778,7 @@ class CRM
         $ciphertext = base64_decode($ssoToken);
 
         if (substr($ciphertext, 0, 8) !== "Salted__") {
-            return response()->json(['status' => false]);
+            return null; //response()->json(['status' => false]);
         }
         $salt = substr($ciphertext, 8, 8);
         $ciphertext = substr($ciphertext, 16);

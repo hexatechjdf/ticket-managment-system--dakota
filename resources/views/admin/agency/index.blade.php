@@ -17,8 +17,8 @@
             <div>
                 <i class="bi bi-people"></i> Agencies
             </div>
-            <a href="{{ route('agency.create') }}" class="btn btn-primary btn-sm">
-                + Add
+            <a href="{{ \App\Helpers\CRM::directConnect() }}" class="btn btn-primary btn-sm">
+                + Add/Connect Agency
             </a>
         </div>
         <div class="table-container p-4">
@@ -27,7 +27,7 @@
                     <tr>
                         <th>#</th>
                         <th>Name</th>
-                        <th>Email</th>
+
                         <th>Assigned Department</th>
                         <th>Connected Agency</th>
                         <th>Active</th>
@@ -81,17 +81,18 @@
                     name: 'name'
                 },
 
-                {
-                    data: 'email',
-                    name: 'email'
-                },
+
                  {
                     data: 'assigned_department',
-                    name: 'assigned_department'
+                    name: 'assigned_department',
+                    orderable: false,
+                    searchable:false,
                 },
                  {
                     data: 'connected_agency',
-                    name: 'connected_agency'
+                    name: 'connected_agency',
+                    orderable: false,
+                    searchable:false,
                 },
                 {
                     data: 'is_active',

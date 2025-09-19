@@ -39,11 +39,7 @@
                         value="{{ old('name', $user->name ?? '') }}" required>
                 </div>
 
-                <div class="mb-3">
-                    <label class="form-label">Email</label>
-                    <input type="email" name="email" class="form-control"
-                        value="{{ old('email', $user->email ?? '') }}" required>
-                </div>
+
 
                 <div class="mb-3">
                     <label class="form-label">Assign Department</label>

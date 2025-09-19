@@ -26,8 +26,6 @@ class CRMConnectionController extends Controller
 
             $code = json_decode($code);
             $companyId = $code->companyId;
-            $crmToken = CrmToken::where('company_id', $companyId)->first();
-
             $user_type = $code->userType ?? null;
 
             $main = route('agency.index');
@@ -37,7 +35,9 @@ class CRMConnectionController extends Controller
                 list($connected, $con) = CRM::go_and_get_token($code, '', $user_id, $token);
                 if ($connected) {
                     $companyData = CRM::agencyV2($companyId, 'companies/' . $companyId);
+                   // dd($companyData);
                     if ($companyData && property_exists($companyData, 'company')) {
+                        $crmToken = CrmToken::where('company_id', $companyId)->first();
                         $companyData = $companyData->company;
                         $detail = new stdClass;
                         $detail->name = $companyData->name;
@@ -46,6 +46,19 @@ class CRMConnectionController extends Controller
                         $detail->phone = $companyData->phone;
                         $detail = json_encode($detail);
                         $crmToken->meta = $detail;
+
+                        $userEmail = $companyId."@agencysupport.com";
+                        $user = User::where('email',$userEmail )->first();
+                        if(!$user){
+                            $user  = new User();
+                            $user->name=$companyData->name;
+                            $user->email=$userEmail;
+
+                            $user->password= \Hash::make($companyId.'333***');
+                            $user->save();
+
+                        }
+                        $crmToken->user_id = $user->id;
                         $crmToken->save();
                     }
                     // $this->authService->getCompany(auth()->user());

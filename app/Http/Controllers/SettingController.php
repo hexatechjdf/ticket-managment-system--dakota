@@ -18,11 +18,16 @@ class SettingController extends Controller
     public function save(Request $request)
     {
         // dd($request->all());
-        foreach ($request->except('_token') as $key => $value) {
-            // if ($request->hasFile($key)) {
-            //     $value = uploadFile($value, 'Upload/Settings', $key . time());
-            // }
+        foreach ($request->except(['_token', 'user_password']) as $key => $value) {
             save_my_settings($key, $value);
+        }
+
+
+        $password = $request->user_password;
+        if ($password) {
+            $authUser = auth()->user();
+            $authUser->password = \Hash::make($password);
+            $authUser->save();
         }
 
         return redirect()->back()->with('success', 'Saved');

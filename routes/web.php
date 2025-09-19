@@ -48,3 +48,4 @@ Route::get('/dashboard', [DashboardController::class, 'index'])->name('dashboard
 Route::post('/dashboard/stats', [DashboardController::class, 'dashboardStats'])->name('dashboard.stats')->withoutMiddleware([Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::post('/api/tickets', [DashboardController::class, 'getTickets'])->name('dashboard.tickets')->withoutMiddleware([Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class]);
 Route::get('/tickets/{ticketId}/messages', [DashboardController::class, 'getMessages'])->name('tickets.messages');
+Route::get('/user/{userId?}', [DashboardController::class, 'getUserInfo'])->name('tickets.user');

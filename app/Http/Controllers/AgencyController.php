@@ -18,10 +18,14 @@ class AgencyController extends Controller
     {
         $connecturl = CRM::directConnect();
         if ($request->ajax()) {
-            $users = User::select(['id', 'name', 'email', 'is_active', 'is_configured'])->where('role', 0);
+            $users = User::with('token')->select(['id', 'name', 'email', 'is_active', 'is_configured'])->where('role', 0);
 
             return DataTables::of($users)
                 ->addIndexColumn()
+                 ->editColumn('name', function ($row) {
+                    return $row->name;
+
+                })
                 ->editColumn('is_active', function ($row) {
                     return $row->is_active
                         ? '<span class="badge bg-success">Yes</span>'
@@ -30,7 +34,7 @@ class AgencyController extends Controller
                 ->editColumn('assigned_department', function ($row) {
                     $department = $row->assignedDepartment ?? null;
                     if (!$department) {
-                        return 'Not Assigned Yet';
+                        return 'Not Assigned';
                     }
                     return $department->name . ' - ' . $department->department_id;
                 })
@@ -39,7 +43,7 @@ class AgencyController extends Controller
                 ->editColumn('connected_agency', function ($row) {
                     $connected_agency = $row->token ?? null;
                     if (!$connected_agency) {
-                        return 'Not Yet Connected';
+                        return 'Not Connected';
                     }
                     $meta = $connected_agency->meta;
                     $meta = json_decode($meta);
@@ -61,9 +65,7 @@ class AgencyController extends Controller
                 <i class="bi bi-pencil-square"></i>
             </a>
 
-              <a href="' . $connecturlWithUserId . '" class="btn btn-sm btn-info" target="_blank" title="Connect">
-            <i class="bi bi-link-45deg"></i>
-              </a>
+
 
             <form action="' . $deleteUrl . '" method="POST" style="display:inline-block;" class="delete-form">
                 ' . csrf_field() . method_field('DELETE') . '
@@ -151,14 +153,14 @@ class AgencyController extends Controller
 
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|email|unique:users,email,' . ($user->id ?? 'NULL'),
+            // 'email' => 'required|email|unique:users,email,' . ($user->id ?? 'NULL'),
             'is_active' => 'required|boolean',
             'is_configured' => 'required|boolean',
             'department_id' => 'required',
         ]);
 
         $user->name = $request->name;
-        $user->email = $request->email;
+        // $user->email = $request->email;
         $user->is_active = $request->is_active;
         $user->is_configured = $request->is_configured;
 
@@ -193,6 +195,8 @@ class AgencyController extends Controller
 
     public function destroy(string $id)
     {
+        $department = AssignedDepartment::where('user_id', $id)->first();
+        $department->delete();
         $user = User::findOrFail($id);
         $user->delete();
 
