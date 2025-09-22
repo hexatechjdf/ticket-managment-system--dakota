@@ -140,7 +140,8 @@ class DashboardController extends Controller
             $startDateString = $this->getDate($today->copy()->startOfMonth());
             $resolvedStart = $request->resolved_start ?? $startDateString;
             $resolvedEnd   = $request->resolved_end ?? $this->getDate($today);
-            $filters[] = ["status", "E", "L"];
+            $filters[] = ["status", "IN", "L,C"];
+            // $filters[] = ["status", "E", "L"];
             $filters[] = ["departmentid", "E", $departmentId];
             //date_resolved
             if ($resolvedStart) $filters[] = ["date_created", "D>=", $resolvedStart . " 00:00:00"];

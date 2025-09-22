@@ -64,7 +64,7 @@
     <div class="card tickets">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
             <!-- Title on the left -->
-            <h5 class="card-title mb-0">Closed Tickets</h5>
+            <h5 class="card-title mb-0">Tickets</h5>
 
             <!-- Filters on the right -->
             <div class="row g-3" style="max-width: 600px;">
@@ -96,6 +96,7 @@
                         <tr>
                             <th>Owner</th>
                             <th>Email</th>
+                            <th>Status</th>
                             <th>Channel</th>
                             <th>Created</th>
                             <th>Subject</th>
@@ -419,6 +420,10 @@
                     {
                         data: 'owner_email',
                         name: 'owner_email'
+                    },
+                    {
+                        data: 'status',
+                        name: 'status'
                     },
                     {
                         data: 'channel_type',
