@@ -64,7 +64,7 @@
     <div class="card tickets">
         <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
             <!-- Title on the left -->
-            <h5 class="card-title mb-0">Tickets</h5>
+            <h5 class="card-title mb-0">Tickets (Closed, Open)</h5>
 
             <!-- Filters on the right -->
             <div class="row g-3" style="max-width: 600px;">
