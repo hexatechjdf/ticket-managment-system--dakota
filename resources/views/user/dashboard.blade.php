@@ -674,7 +674,7 @@
                 url: `/tickets/${ticketId}/messages`,
                 method: 'GET',
                 headers: {
-                    auth_token: ssoToken
+                    "X-Auth-Token": ssoToken
                 },
                 success: async function(response) {
 

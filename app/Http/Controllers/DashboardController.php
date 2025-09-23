@@ -16,7 +16,10 @@ class DashboardController extends Controller
     {
         $status = 4;
 
-        $authToken = $request->auth_token ?? $request->header('auth_token') ?? null;
+        $authToken = $request->input('auth_token')
+            ?? $request->header('auth_token')
+            ?? $request->header('X-Auth-Token')
+            ?? null;
         if (!$authToken || empty($authToken)) {
             return [$status, null];
         }
@@ -35,7 +38,6 @@ class DashboardController extends Controller
                 Cache::forget($d);
             }
             Cache::forget($keyFinal);
-
         }
         if (!$companyId) {
             return [$status, null];
@@ -300,10 +302,10 @@ class DashboardController extends Controller
     private function getMainCache()
     {
         $keyFinal = 'companyKeys.' . request()->get('companyId');
-       // dd($keyFinal);
-        $data=Cache::get($keyFinal, []);
-        if(!is_array($data)){
-            $data= [$data];
+        // dd($keyFinal);
+        $data = Cache::get($keyFinal, []);
+        if (!is_array($data)) {
+            $data = [$data];
         }
 
         return [$keyFinal, $data];
