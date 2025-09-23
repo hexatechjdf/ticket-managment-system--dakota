@@ -276,14 +276,14 @@
                     </div>
 
                     <!-- Remember Me -->
-                    <div class="mb-3 form-check">
+                    <!-- <div class="mb-3 form-check">
                         <input type="checkbox" class="form-check-input" id="remember_me" name="remember">
                         <label class="form-check-label" for="remember_me">Remember me</label>
 
                         @if (Route::has('password.request'))
                         <a href="{{ route('password.request') }}" class="float-end">Forgot password?</a>
                         @endif
-                    </div>
+                    </div> -->
 
                     <button type="submit" class="btn btn-primary btn-block mb-3">
                         <i class="bi bi-box-arrow-in-right me-2"></i>Sign In
