@@ -70,7 +70,7 @@
         <div class="row g-3">
             <div class="col-md-4">
                 <label for="ticketStatus" class="form-label mb-1">Status</label>
-                <select name="ticket_status" class="form-select" id="ticketStatus">
+                <select name="ticket_status" class="form-select" id="ticketStatusTable">
                     <option value="">All (Open & Closed)</option>
                     <option value="C">Open</option>
                     <option value="L">Closed</option>
@@ -369,8 +369,16 @@
 
         let tickets = {};
 
+        $(document).ready(function() {
+            // Initialize ticket status filter
+            $('#ticketStatusTable').on('change', function() {
+                table.ajax.reload();
+            });
+        });
+
+
         function getTickets(data, page = 1, callback) {
-            const ticketStatus = $('#ticketStatus').val();
+            const ticketStatus = $('#ticketStatusTable').val();
             const requestData = {
                 ...data,
                 status: $('#statusSelect').val(),
@@ -599,7 +607,7 @@
 
         $('#statusSelect, #startDate, #endDate').on('change', getDashboardStats);
 
-        $('#resolvedStart, #resolvedEnd', '#ticketStatus').on('change', debounce(function() {
+        $('#resolvedStart, #resolvedEnd', '#ticketStatusTable').on('change', debounce(function() {
             table.ajax.reload();
         }, 400));
 
