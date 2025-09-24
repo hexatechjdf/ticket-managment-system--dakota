@@ -61,60 +61,60 @@
     </div>
 
     <!-- Tickets Table -->
-  <div class="card tickets">
-    <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-        <!-- Title on the left -->
-        <h5 class="card-title mb-0">Tickets (Closed, Open)</h5>
+    <div class="card tickets">
+        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+            <!-- Title on the left -->
+            <h5 class="card-title mb-0">Tickets (Closed, Open)</h5>
 
-        <!-- Filters on the right -->
-        <div class="row g-3">
-            <div class="col-md-4">
-                <label for="ticketStatus" class="form-label mb-1">Status</label>
-                <select name="ticket_status" class="form-select" id="ticketStatusTable">
-                    <option value="">All (Open & Closed)</option>
-                    <option value="C">Open</option>
-                    <option value="L">Closed</option>
-                </select>
+            <!-- Filters on the right -->
+            <div class="row g-3">
+                <div class="col-md-4">
+                    <label for="ticketStatus" class="form-label mb-1">Status</label>
+                    <select name="ticket_status" class="form-select" id="ticketStatusTable">
+                        <option value="">All (Open & Closed)</option>
+                        <option value="C">Open</option>
+                        <option value="L">Closed</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="resolvedStart" class="form-label mb-1">Start Date (Created)</label>
+                    <input
+                        type="date"
+                        name="resolved_start"
+                        class="form-control"
+                        value="{{ $filters['resolved_start'] }}"
+                        id="resolvedStart">
+                </div>
+                <div class="col-md-4">
+                    <label for="resolvedEnd" class="form-label mb-1">End Date (Created)</label>
+                    <input
+                        type="date"
+                        name="resolved_end"
+                        class="form-control"
+                        value="{{ $filters['resolved_end'] }}"
+                        id="resolvedEnd">
+                </div>
             </div>
-            <div class="col-md-4">
-                <label for="resolvedStart" class="form-label mb-1">Start Date (Created)</label>
-                <input
-                    type="date"
-                    name="resolved_start"
-                    class="form-control"
-                    value="{{ $filters['resolved_start'] }}"
-                    id="resolvedStart">
-            </div>
-            <div class="col-md-4">
-                <label for="resolvedEnd" class="form-label mb-1">End Date (Created)</label>
-                <input
-                    type="date"
-                    name="resolved_end"
-                    class="form-control"
-                    value="{{ $filters['resolved_end'] }}"
-                    id="resolvedEnd">
+        </div>
+
+        <div class="card-body">
+            <div class="table-responsive w-100">
+                <table id="ticketsTable" class="table table-striped table-bordered w-100 align-middle">
+                    <thead>
+                        <tr>
+                            <th>Owner</th>
+                            <th>Email</th>
+                            <th>Status</th>
+                            <th>Channel</th>
+                            <th>Created</th>
+                            <th>Subject</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                </table>
             </div>
         </div>
     </div>
-
-    <div class="card-body">
-        <div class="table-responsive w-100">
-            <table id="ticketsTable" class="table table-striped table-bordered w-100 align-middle">
-                <thead>
-                    <tr>
-                        <th>Owner</th>
-                        <th>Email</th>
-                        <th>Status</th>
-                        <th>Channel</th>
-                        <th>Created</th>
-                        <th>Subject</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-            </table>
-        </div>
-    </div>
-</div>
 </div>
 
 <!-- Messages Modal - Redesigned to match LiveAgent -->
@@ -607,7 +607,7 @@
 
         $('#statusSelect, #startDate, #endDate').on('change', getDashboardStats);
 
-        $('#resolvedStart, #resolvedEnd', '#ticketStatusTable').on('change', debounce(function() {
+        $('#resolvedStart, #resolvedEnd, #ticketStatusTable').on('change', debounce(function() {
             table.ajax.reload();
         }, 400));
 
@@ -869,14 +869,6 @@
                     }
                 }
 
-                // For debugging - log message details
-                // console.log('Message:', {
-                //     type: message.type,
-                //     userid: userId,
-                //     userType: userType,
-                //     userName: senderName,
-                //     content: message.message
-                // });
                 if (!ignoreData) {
                     // Create message card
                     const messageCard = $(`
@@ -914,16 +906,18 @@
             if (messageText.includes("User is not logged in")) {
                 return "";
             }
+            // Check if the message contains HTML tags
+            const hasHTML = /<[a-z][\s\S]*>/i.test(messageText);
 
             // Handle different message types
             if (message.type === 'I') {
                 // Internal note
                 content = `<div class="internal-note">
-                    <strong>Internal Note:</strong><br>
-                    ${escapeHtml(messageText).replace(/\n/g, '<br>')}
-                </div>`;
+            <strong>Internal Note:</strong><br>
+            ${hasHTML ? messageText : escapeHtml(messageText).replace(/\n/g, '<br>')}
+        </div>`;
             } else if (message.type === 'F' || message.type === 'L') {
-                // File attachment - parse JSON if needed
+                // File attachment handling (same as before)
                 let attachmentHtml = '';
                 try {
                     const attachmentData = JSON.parse(messageText);
@@ -932,44 +926,44 @@
                             if (Array.isArray(item) && item.length >= 2) {
                                 if (item[0] === 'name' && item[1]) {
                                     attachmentHtml += `
-                                        <a href="#" class="attachment-item" target="_blank">
-                                            <span class="attachment-icon"><i class="bi bi-paperclip"></i></span>
-                                            ${item[1]}
-                                        </a>
-                                    `;
+                                <a href="#" class="attachment-item" target="_blank">
+                                    <span class="attachment-icon"><i class="bi bi-paperclip"></i></span>
+                                    ${escapeHtml(item[1])}
+                                </a>
+                            `;
                                 }
                             }
                         });
                     }
                 } catch (e) {
-                    // If not JSON, just display the raw message
-                    attachmentHtml = `<div class="message-text">${escapeHtml(messageText).replace(/\n/g, '<br>')}</div>`;
+                    attachmentHtml = `<div class="message-text">${hasHTML ? messageText : escapeHtml(messageText).replace(/\n/g, '<br>')}</div>`;
                 }
-
                 content = `<div class="message-attachments">${attachmentHtml}</div>`;
-            } else if (message.type === 'S') {
-                // System message
-                content = `<div class="message-event">
-                    ${escapeHtml(messageText)}
-                </div>`;
-            } else if (message.type === 'T') {
-                // Ticket/system action
-                content = `<div class="message-text"><small>${escapeHtml(messageText).replace(/\n/g, '<br>')}</small></div>`;
-            } else if (message.type === 'M') {
-                // Regular message
-                content = `<div class="message-text">${escapeHtml(messageText).replace(/\n/g, '<br>')}</div>`;
             } else {
-                // Default for other message types
-                content = `<div class="message-text">${escapeHtml(messageText).replace(/\n/g, '<br>')}</div>`;
+                // For regular messages and other types
+                if (hasHTML) {
+                    content = `<div class="message-text html-content">${sanitizeHTML(messageText)}</div>`;
+                } else {
+                    content = `<div class="message-text">${escapeHtml(messageText).replace(/\n/g, '<br>')}</div>`;
+                }
             }
 
             return content;
         }
 
-        // Helper function to escape HTML with null checking
+        // HTML sanitization function
+        function sanitizeHTML(html) {
+            // Basic sanitization - remove script tags and other dangerous content
+            return html
+                .replace(/<script\b[^<]*(?:(?!<\/script>)<[^<]*)*<\/script>/gi, '')
+                .replace(/on\w+="[^"]*"/g, '')
+                .replace(/on\w+='[^']*'/g, '')
+                .replace(/javascript:/gi, '');
+        }
+
+        // Keep your existing escapeHtml function
         function escapeHtml(text) {
             if (!text) return '';
-
             const map = {
                 '&': '&amp;',
                 '<': '&lt;',
