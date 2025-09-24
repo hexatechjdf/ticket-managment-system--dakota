@@ -61,52 +61,60 @@
     </div>
 
     <!-- Tickets Table -->
-    <div class="card tickets">
-        <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
-            <!-- Title on the left -->
-            <h5 class="card-title mb-0">Tickets (Closed, Open)</h5>
+  <div class="card tickets">
+    <div class="card-header d-flex justify-content-between align-items-center flex-wrap">
+        <!-- Title on the left -->
+        <h5 class="card-title mb-0">Tickets (Closed, Open)</h5>
 
-            <!-- Filters on the right -->
-            <div class="row g-3" style="max-width: 600px;">
-                <div class="col-md-6">
-                    <label for="resolvedStart" class="form-label mb-1">Start Date (Closed)</label>
-                    <input
-                        type="date"
-                        name="resolved_start"
-                        class="form-control"
-                        value="{{ $filters['resolved_start'] }}"
-                        id="resolvedStart">
-                </div>
-                <div class="col-md-6">
-                    <label for="resolvedEnd" class="form-label mb-1">End Date (Closed)</label>
-                    <input
-                        type="date"
-                        name="resolved_end"
-                        class="form-control"
-                        value="{{ $filters['resolved_end'] }}"
-                        id="resolvedEnd">
-                </div>
+        <!-- Filters on the right -->
+        <div class="row g-3">
+            <div class="col-md-4">
+                <label for="ticketStatus" class="form-label mb-1">Status</label>
+                <select name="ticket_status" class="form-select" id="ticketStatus">
+                    <option value="">All (Open & Closed)</option>
+                    <option value="C">Open</option>
+                    <option value="L">Closed</option>
+                </select>
             </div>
-        </div>
-
-        <div class="card-body">
-            <div class="table-responsive w-100">
-                <table id="ticketsTable" class="table table-striped table-bordered w-100 align-middle">
-                    <thead>
-                        <tr>
-                            <th>Owner</th>
-                            <th>Email</th>
-                            <th>Status</th>
-                            <th>Channel</th>
-                            <th>Created</th>
-                            <th>Subject</th>
-                            <th>Actions</th>
-                        </tr>
-                    </thead>
-                </table>
+            <div class="col-md-4">
+                <label for="resolvedStart" class="form-label mb-1">Start Date (Created)</label>
+                <input
+                    type="date"
+                    name="resolved_start"
+                    class="form-control"
+                    value="{{ $filters['resolved_start'] }}"
+                    id="resolvedStart">
+            </div>
+            <div class="col-md-4">
+                <label for="resolvedEnd" class="form-label mb-1">End Date (Created)</label>
+                <input
+                    type="date"
+                    name="resolved_end"
+                    class="form-control"
+                    value="{{ $filters['resolved_end'] }}"
+                    id="resolvedEnd">
             </div>
         </div>
     </div>
+
+    <div class="card-body">
+        <div class="table-responsive w-100">
+            <table id="ticketsTable" class="table table-striped table-bordered w-100 align-middle">
+                <thead>
+                    <tr>
+                        <th>Owner</th>
+                        <th>Email</th>
+                        <th>Status</th>
+                        <th>Channel</th>
+                        <th>Created</th>
+                        <th>Subject</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+            </table>
+        </div>
+    </div>
+</div>
 </div>
 
 <!-- Messages Modal - Redesigned to match LiveAgent -->
@@ -362,6 +370,7 @@
         let tickets = {};
 
         function getTickets(data, page = 1, callback) {
+            const ticketStatus = $('#ticketStatus').val();
             const requestData = {
                 ...data,
                 status: $('#statusSelect').val(),
@@ -370,6 +379,7 @@
                 resolved_start: $('#resolvedStart').val(),
                 resolved_end: $('#resolvedEnd').val(),
                 _token: "{{ csrf_token() }}",
+                ticket_status: ticketStatus, // Add this line
                 auth_token: ssoToken,
                 no_cache: hardReload,
                 page: page
@@ -589,7 +599,7 @@
 
         $('#statusSelect, #startDate, #endDate').on('change', getDashboardStats);
 
-        $('#resolvedStart, #resolvedEnd').on('change', debounce(function() {
+        $('#resolvedStart, #resolvedEnd', '#ticketStatus').on('change', debounce(function() {
             table.ajax.reload();
         }, 400));
 

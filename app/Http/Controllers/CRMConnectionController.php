@@ -29,6 +29,7 @@ class CRMConnectionController extends Controller
             $user_type = $code->userType ?? null;
 
             $main = route('agency.index');
+            $agencyConnected = route('agencyconnected');
 
             if ($user_type) {
                 $token = $user->token ?? null;
@@ -62,12 +63,20 @@ class CRMConnectionController extends Controller
                         $crmToken->save();
                     }
                     // $this->authService->getCompany(auth()->user());
+                    if(!auth()->user()){
+                       return redirect($agencyConnected)->with('success', 'Connected Successfully');
+
+                    }
                     return redirect($main)->with('success', 'Connected Successfully');
                 }
                 return redirect($main)->with('error', json_encode($code));
             }
             return response()->json(['message' => 'Not allowed to connect']);
         }
+    }
+    
+    public function agencyconnected(){
+        return view('user.agencyconnected');
     }
 
     private function evp_bytes_to_key($password, $salt)

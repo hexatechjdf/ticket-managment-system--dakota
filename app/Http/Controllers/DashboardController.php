@@ -142,7 +142,20 @@ class DashboardController extends Controller
             $startDateString = $this->getDate($today->copy()->startOfMonth());
             $resolvedStart = $request->resolved_start ?? $startDateString;
             $resolvedEnd   = $request->resolved_end ?? $this->getDate($today);
-            $filters[] = ["status", "IN", "L,C"];
+            $ticketStatus = $request->ticket_status ?? '';
+
+            // Build status filter based on selection
+            if ($ticketStatus === 'C') {
+                // Only Open tickets
+                $filters[] = ["status", "E", "C"];
+            } elseif ($ticketStatus === 'L') {
+                // Only Closed tickets
+                $filters[] = ["status", "E", "L"];
+            } else {
+                // All (Both Open and Closed) - default behavior
+                $filters[] = ["status", "IN", "C,L"];
+            }
+            // $filters[] = ["status", "IN", "L,C"];
             // $filters[] = ["status", "E", "L"];
             $filters[] = ["departmentid", "E", $departmentId];
             //date_resolved
