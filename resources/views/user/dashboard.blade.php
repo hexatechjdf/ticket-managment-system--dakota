@@ -11,6 +11,10 @@
         .message-text {
             word-break: break-word;
         }
+
+        .message-card.message-customer .message-header {
+            flex-direction: row-reverse;
+        }
     </style>
     <div class="content-section active" id="dashboard">
         <!-- Department Info -->
@@ -766,26 +770,26 @@
                 const result = _.map(messageGroups, group => {
                     const allMessages = group.messages || [];
 
-                
+
                     const headerMessages = _.filter(allMessages, {
                         type: "H"
                     });
 
-                    
+
                     const mergedHeaders = _.map(headerMessages, "message").join("<br/>");
 
-                   
+
                     const filteredMessages = _.filter(allMessages, m => ["T", "M", "S", "Z"].includes(m
                         .type));
 
                     return filteredMessages.length > 0 ? {
                         ...group,
-                        headersMerged: mergedHeaders, 
-                        messages: filteredMessages 
+                        headersMerged: mergedHeaders,
+                        messages: filteredMessages
                     } : null;
                 }).filter(Boolean);
-             
-              
+
+
                 result.forEach(x => {
 
                     let allMessages = x.messages;
@@ -841,7 +845,7 @@
                                 .length > 5)
                         ) {
                             // Agent messages
-                           
+
                             senderName = userFullName || 'Agent';
 
                         } else if (userId === 'system00') {
