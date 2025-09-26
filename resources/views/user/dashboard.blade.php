@@ -782,10 +782,16 @@
 
                 // Render each individual message
                 allMessages.forEach(message => {
+                  
+
                     if (['E1'].includes(message.type) && !message.message) {
                         return;
                     }
-
+                    let isWrappedArrayMessage = /^\[\[.*\]\]$/.test(message.message.trim());
+                    if(isWrappedArrayMessage)
+                    {
+                        return;
+                    }
                     // Determine message type for styling
                     let messageType = 'message-customer';
                     let senderName = 'Customer';
@@ -942,7 +948,9 @@
 
             // Keep your existing escapeHtml function
             function escapeHtml(text) {
+               
                 if (!text) return '';
+                return text;
                 const map = {
                     '&': '&amp;',
                     '<': '&lt;',
