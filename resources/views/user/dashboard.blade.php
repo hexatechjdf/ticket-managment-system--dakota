@@ -391,7 +391,7 @@
                     method: "POST",
                     data: requestData,
                     success: function(response) {
-                     
+
                         hardReload = 0;
                         // Pass the processed data back to DataTables
                         if (response.data.length > 0) {
@@ -419,7 +419,7 @@
                     lengthChange: false,
                     ajax: function(data, callback, settings) {
                         // Debug the incoming DataTables parameters
-                     
+
                         getTickets(data, data.draw ?? 1, callback);
                         // Collect extra filter parameters
 
@@ -466,11 +466,11 @@
                     json.data.forEach(x => {
                         tickets[x.id] = x;
                     })
-                  
+
                     // Do something with json.data if the data is under "data" key
                 });
                 table.on('length.dt', function(e, settings, len) {
-               
+
 
 
                     table.ajax.reload();
@@ -751,7 +751,7 @@
                     if (!group) return;
 
                     if (group.messages && Array.isArray(group.messages)) {
-                        let messages = _.groupBy(group.messages,'type');
+                        let messages = _.groupBy(group.messages, 'type');
                         console.log(messages);
                         group.messages.forEach(message => {
                             if (message) {
@@ -779,18 +779,34 @@
                 // Sort all messages by date
                 // allMessages.sort((a, b) => new Date(a.datecreated) - new Date(b.datecreated));
 
+                let result = _.map(messageGroups, group => {
+                    const allMessages = group.messages || [];
 
+                    let typeIgnore = "H";
+                    const headerMessages = _.filter(allMessages, {
+                        type: typeIgnore
+                    });
 
+                    const mergedHeaders = _.map(headerMessages, "message").join("<br/>");
+
+                    const filteredMessages = _.filter(allMessages, m => m.type !== typeIgnore);
+
+                    return {
+                        ...group,
+                        headersMerged: mergedHeaders, // new merged field
+                        messages: filteredMessages // messages without type H
+                    };
+                });
+                console.log(result)
                 // Render each individual message
                 allMessages.forEach(message => {
-                  
+
                     let text = message.message || '';
-                    if (['E1','4','T'].includes(message.type) && text=='') {
+                    if (['E1', '4', 'T', 'F', 'Q'].includes(message.type) || text == '' || !text) {
                         return;
                     }
                     let isWrappedArrayMessage = /^\[\[.*\]\]$/.test(text);
-                    if(isWrappedArrayMessage)
-                    {
+                    if (isWrappedArrayMessage) {
                         return;
                     }
                     // Determine message type for styling
@@ -800,7 +816,7 @@
 
                     // Use the most specific user information available
                     let userFullName =
-                    ""; //message.group_user_full_name || message.user_full_name || "Unknown";
+                        ""; //message.group_user_full_name || message.user_full_name || "Unknown";
                     const userType = message.group_user_type || message.user_type;
                     const userId = message.userid; //message.group_userid ||
                     let ignoreData = false;
@@ -829,7 +845,7 @@
 
                     } else if (userType === 'A' || userType === 'agent' ||
                         (userId && userId !== 'system00' && userId !== 'si6if3yp' && userId.length > 5)
-                        ) {
+                    ) {
                         // Agent messages
                         messageType = 'message-agent';
                         senderName = userFullName || 'Agent';
@@ -948,7 +964,7 @@
 
             // Keep your existing escapeHtml function
             function escapeHtml(text) {
-               
+
                 if (!text) return '';
                 return text;
                 const map = {
