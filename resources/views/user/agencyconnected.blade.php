@@ -11,7 +11,7 @@
         <p class="text-muted mb-4">
             {{ get_default_settings('contact_message') }}
         </p>
-        You can access the portal via the menu link from sidebar with name "Agency Support Stats"
+        You can access the portal via a custom menu link from agency sidebar with name "Agency Support Stats"
     </div>
 </div>
 
