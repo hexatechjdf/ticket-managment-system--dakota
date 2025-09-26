@@ -19,7 +19,7 @@
                         </a>
                     </li> -->
                 <li class="nav-item me-2">
-                    <a href="{{ route('setting.index') }}" class="nav-link @yield('select_setting')" data-section="settings">
+                    <a href="{{ route('setting.index') }}" class="nav-link @yield('select_setting')" style="visibility: hidden" data-section="settings">
                         <i class="bi bi-gear"></i>
                         <span>Settings</span>
                     </a>

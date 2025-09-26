@@ -12,6 +12,7 @@ class SettingController extends Controller
      */
     public function index()
     {
+        return;
         return view('admin.setting.index');
     }
 
