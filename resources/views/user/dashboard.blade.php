@@ -823,6 +823,7 @@
                         userFullName = "Visitor";
                         if (role == 'agent') {
                             userFullName = user.name + `(Agent)`;
+                            messageType = 'message-agent';
                         }
                         avatarText = userFullName.charAt(0).toUpperCase();
                         if (['T', 'U', 'Z', 'I', 'S'].includes(message.type)) {
@@ -840,7 +841,7 @@
                                 .length > 5)
                         ) {
                             // Agent messages
-                            messageType = 'message-agent';
+                           
                             senderName = userFullName || 'Agent';
 
                         } else if (userId === 'system00') {
@@ -850,11 +851,6 @@
                             avatarText = 'S';
                             ignoreData = true;
                         } else {
-                            // Customer messages (default)
-                            messageType = 'message-customer';
-                            senderName = userFullName || 'Customer';
-
-                            // Special case: if userid starts with 'si' it's likely a customer
                             if (userId && userId.startsWith('si')) {
                                 senderName = userFullName || 'Customer';
                                 avatarText = senderName.charAt(0).toUpperCase();
