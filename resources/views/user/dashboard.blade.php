@@ -139,7 +139,6 @@
                             <span id="ticketStatus" class="badge bg-success"></span>
                         </div>
                         <div class="ticket-meta text-muted small">
-                            <span id="ticketCode" class="me-3"></span>
                             <span id="ticketDate" class="me-3"></span>
                             <span id="ticketChannel"></span>
                         </div>
@@ -652,24 +651,13 @@
             $('#noMessages').addClass('d-none');
             $('#errorContainer').addClass('d-none');
             currentTicketInfo = tickets[ticketId] ?? {};
-            // console.log(ticketInfo);
-            // // Store ticket info for use in the modal
-            // currentTicketInfo = {
-            //     id: ticketId,
-            //     subject: ticketSubject,
-            //     status: ticketStatus,
-            //     date: ticketDate,
-            //     channel: ticketChannel
-            // };
-
-            $('#messagesModalLabel').text(`Conversation for Ticket #${ticketId}`);
+            $('#messagesModalLabel').text(`Conversation for Ticket Code ${currentTicketInfo.code}`);
             loadMessages(ticketId);
             $('#messagesModal').modal('show');
         });
 
         // Function to load messages via AJAX
         function loadMessages(ticketId) {
-            // Show loading, hide other sections
             $('#loadingSpinner').removeClass('d-none');
             $('#messagesContainer').addClass('d-none');
             $('#noMessages').addClass('d-none');
@@ -679,7 +667,6 @@
             if (currentTicketInfo) {
                 $('#ticketSubject').text(currentTicketInfo.subject);
                 $('#ticketStatus').text(currentTicketInfo.status);
-                $('#ticketCode').text(`Code: ${currentTicketInfo.code}`);
                 $('#ticketDate').text(`Created: ${formatDate(currentTicketInfo.date_created)}`);
                 $('#ticketChannel').text(`Channel: ${currentTicketInfo.channel_type??""}`);
             }
@@ -738,11 +725,9 @@
             }
         }
         const userInfoMap = {};
-        // Function to render messages in the modal (LiveAgent style)
         async function renderMessages(messageGroups) {
             const container = $('.conversation-timeline');
 
-            // First, collect all individual messages from all groups
             const allMessages = [];
 
             const userIds = _.uniq(
@@ -769,15 +754,11 @@
             console.log(userInfoMap);
 
             messageGroups.forEach(group => {
-                // Skip if group is undefined or null
                 if (!group) return;
 
-                // Check if this group has nested messages
                 if (group.messages && Array.isArray(group.messages)) {
-                    // Add each individual message from this group
                     group.messages.forEach(message => {
                         if (message) {
-                            // Add group info to each message for context
                             allMessages.push({
                                 ...message,
                                 group_user_full_name: group.user_full_name,
@@ -806,7 +787,6 @@
 
             // Render each individual message
             allMessages.forEach(message => {
-                // Skip certain system message types if they don't have meaningful content
                 if (['E1'].includes(message.type) && !message.message) {
                     return;
                 }
