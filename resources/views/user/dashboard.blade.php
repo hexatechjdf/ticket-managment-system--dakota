@@ -138,7 +138,7 @@
                             </div>
                         </div>
                         <div class="d-flex ">
-                            <div class="conversation-container w-75" style="max-height: 70vh; overflow-y: auto;">
+                            <div class="conversation-container w-75" style="max-height: 60vh; overflow-y: auto;">
                                 <div class="conversation-timeline p-3">
                                     <!-- Messages will be inserted here -->
                                 </div>
@@ -391,7 +391,7 @@
                     method: "POST",
                     data: requestData,
                     success: function(response) {
-                        console.log('Server response:', response);
+                     
                         hardReload = 0;
                         // Pass the processed data back to DataTables
                         if (response.data.length > 0) {
@@ -419,7 +419,7 @@
                     lengthChange: false,
                     ajax: function(data, callback, settings) {
                         // Debug the incoming DataTables parameters
-                        console.log('DataTable request:', data);
+                     
                         getTickets(data, data.draw ?? 1, callback);
                         // Collect extra filter parameters
 
@@ -466,11 +466,11 @@
                     json.data.forEach(x => {
                         tickets[x.id] = x;
                     })
-                    console.log('Returned data:', json); // Full response data
+                  
                     // Do something with json.data if the data is under "data" key
                 });
                 table.on('length.dt', function(e, settings, len) {
-                    console.log('Length changed to: ' + len);
+               
 
 
                     table.ajax.reload();
@@ -746,12 +746,13 @@
                     if (data) userInfoMap[id] = data[0] ?? "";
                 });
 
-                console.log(userInfoMap);
 
                 messageGroups.forEach(group => {
                     if (!group) return;
 
                     if (group.messages && Array.isArray(group.messages)) {
+                        let messages = _.groupBy(group.messages,'type');
+                        console.log(messages);
                         group.messages.forEach(message => {
                             if (message) {
                                 allMessages.push({
@@ -783,11 +784,11 @@
                 // Render each individual message
                 allMessages.forEach(message => {
                   
-
-                    if (['E1'].includes(message.type) && !message.message) {
+                    let text = message.message || '';
+                    if (['E1'].includes(message.type) && text=='') {
                         return;
                     }
-                    let isWrappedArrayMessage = /^\[\[.*\]\]$/.test(message.message.trim());
+                    let isWrappedArrayMessage = /^\[\[.*\]\]$/.test(text);
                     if(isWrappedArrayMessage)
                     {
                         return;
@@ -816,7 +817,6 @@
                         userFullName = user.name + `(Agent)`;
                     }
                     avatarText = userFullName.charAt(0).toUpperCase();
-                    console.log(user, userId);
                     // Determine user type (customer, agent, or system)
                     if (['T', 'U', 'Z', 'I', 'S'].includes(message.type)) {
 
