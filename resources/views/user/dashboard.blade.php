@@ -1,6 +1,17 @@
 @extends('custom-layouts.agency.app')
 
 @section('content')
+    <style>
+        .email-header {
+            padding: 2px 16px;
+            font-style: italic;
+            font-size: x-small;
+        }
+
+        .message-text {
+            word-break: break-word;
+        }
+    </style>
     <div class="content-section active" id="dashboard">
         <!-- Department Info -->
         <div class="row">
@@ -145,12 +156,14 @@
                             </div>
                             <div class="ticket-container w-25 p-2 d-flex flex-column bg-light" style="">
 
-                                <!-- <div class="ticket-u"></div> -->
-                                <div class="ticket-s"></div>
+                                <div class="fw-bold mx-auto text-center">Visitor Info</div>
+                                <div class="ticket-z info-detail">
 
-                                <div class="ticket-z">
-                                    <div class="fw-bold">Visitor Info</div>
                                 </div>
+                                <!-- <div class="ticket-u"></div> -->
+                                <div class="ticket-s info-detail"></div>
+
+
 
                             </div>
 
@@ -747,130 +760,113 @@
                 });
 
 
-                messageGroups.forEach(group => {
-                    if (!group) return;
 
-                    if (group.messages && Array.isArray(group.messages)) {
-                        let messages = _.groupBy(group.messages, 'type');
-                        console.log(messages);
-                        group.messages.forEach(message => {
-                            if (message) {
-                                allMessages.push({
-                                    ...message,
-                                    group_user_full_name: group.user_full_name,
-                                    group_user_type: group.user_type,
-                                    group_userid: group.userid,
-                                    group_datecreated: group.datecreated
-                                });
-                            }
-                        });
-                    } else {
-                        // This is a single message (not a group)
-                        allMessages.push({
-                            ...group,
-                            group_user_full_name: group.user_full_name,
-                            group_user_type: group.user_type,
-                            group_userid: group.userid,
-                            group_datecreated: group.datecreated
-                        });
-                    }
-                });
 
-                // Sort all messages by date
-                // allMessages.sort((a, b) => new Date(a.datecreated) - new Date(b.datecreated));
-
-                let result = _.map(messageGroups, group => {
+                $('.info-detail').html('');
+                const result = _.map(messageGroups, group => {
                     const allMessages = group.messages || [];
 
-                    let typeIgnore = "H";
+                
                     const headerMessages = _.filter(allMessages, {
-                        type: typeIgnore
+                        type: "H"
                     });
 
+                    
                     const mergedHeaders = _.map(headerMessages, "message").join("<br/>");
 
-                    const filteredMessages = _.filter(allMessages, m => m.type !== typeIgnore);
+                   
+                    const filteredMessages = _.filter(allMessages, m => ["T", "M", "S", "Z"].includes(m
+                        .type));
 
-                    return {
+                    return filteredMessages.length > 0 ? {
                         ...group,
-                        headersMerged: mergedHeaders, // new merged field
-                        messages: filteredMessages // messages without type H
-                    };
-                });
-                console.log(result)
-                // Render each individual message
-                allMessages.forEach(message => {
+                        headersMerged: mergedHeaders, 
+                        messages: filteredMessages 
+                    } : null;
+                }).filter(Boolean);
+             
+              
+                result.forEach(x => {
 
-                    let text = message.message || '';
-                    if (['E1', '4', 'T', 'F', 'Q'].includes(message.type) || text == '' || !text) {
-                        return;
-                    }
-                    let isWrappedArrayMessage = /^\[\[.*\]\]$/.test(text);
-                    if (isWrappedArrayMessage) {
-                        return;
-                    }
-                    // Determine message type for styling
-                    let messageType = 'message-customer';
-                    let senderName = 'Customer';
-                    let avatarText = 'C';
+                    let allMessages = x.messages;
+                    let header = x.headersMerged ?? "";
+                    allMessages.forEach((message, ind) => {
 
-                    // Use the most specific user information available
-                    let userFullName =
-                        ""; //message.group_user_full_name || message.user_full_name || "Unknown";
-                    const userType = message.group_user_type || message.user_type;
-                    const userId = message.userid; //message.group_userid ||
-                    let ignoreData = false;
-                    // Set sender name if available
-                    if (userFullName) {
-                        senderName = userFullName;
-
-                    }
-
-                    let user = userInfoMap[userId] ?? {};
-                    let role = user.role ?? "";
-                    userFullName = "Visitor";
-                    if (role == 'agent') {
-                        userFullName = user.name + `(Agent)`;
-                    }
-                    avatarText = userFullName.charAt(0).toUpperCase();
-                    // Determine user type (customer, agent, or system)
-                    if (['T', 'U', 'Z', 'I', 'S'].includes(message.type)) {
-
-
-                        // System messages
-                        let content = `
-                        ${formatMessageContent(message)}`
-                        ignoreData = true;
-                        $('.ticket-container .ticket-' + message.type.toLowerCase()).append($(content));
-
-                    } else if (userType === 'A' || userType === 'agent' ||
-                        (userId && userId !== 'system00' && userId !== 'si6if3yp' && userId.length > 5)
-                    ) {
-                        // Agent messages
-                        messageType = 'message-agent';
-                        senderName = userFullName || 'Agent';
-
-                    } else if (userId === 'system00') {
-                        // System messages
-                        messageType = 'message-system';
-                        senderName = 'System';
-                        avatarText = 'S';
-                        ignoreData = true;
-                    } else {
-                        // Customer messages (default)
-                        messageType = 'message-customer';
-                        senderName = userFullName || 'Customer';
-
-                        // Special case: if userid starts with 'si' it's likely a customer
-                        if (userId && userId.startsWith('si')) {
-                            senderName = userFullName || 'Customer';
-                            avatarText = senderName.charAt(0).toUpperCase();
+                        let text = message.message || '';
+                        if (['E1', '4', 'F', 'Q'].includes(message.type) || text == '' || !
+                            text) {
+                            return;
                         }
-                    }
+                        let isWrappedArrayMessage = /^\[\[.*\]\]$/.test(text);
+                        if (isWrappedArrayMessage) {
+                            return;
+                        }
+                        // Determine message type for styling
+                        let messageType = 'message-customer';
+                        let senderName = 'Customer';
+                        let avatarText = 'C';
 
-                    if (!ignoreData) {
-                        // Create message card
-                        const messageCard = $(`
+                        // Use the most specific user information available
+                        let userFullName =
+                            ""; //message.group_user_full_name || message.user_full_name || "Unknown";
+                        const userType = message.group_user_type || message.user_type;
+                        const userId = message.userid; //message.group_userid ||
+                        let ignoreData = false;
+                        // Set sender name if available
+                        if (userFullName) {
+                            senderName = userFullName;
+
+                        }
+
+                        let user = userInfoMap[userId] ?? {};
+                        let role = user.role ?? "";
+                        userFullName = "Visitor";
+                        if (role == 'agent') {
+                            userFullName = user.name + `(Agent)`;
+                        }
+                        avatarText = userFullName.charAt(0).toUpperCase();
+                        if (['T', 'U', 'Z', 'I', 'S'].includes(message.type)) {
+
+
+                            // System messages
+                            let content = `
+                        ${formatMessageContent(message)}`
+                            ignoreData = true;
+                            $('.ticket-container .ticket-' + message.type.toLowerCase()).append(
+                                $(content));
+
+                        } else if (userType === 'A' || userType === 'agent' ||
+                            (userId && userId !== 'system00' && userId !== 'si6if3yp' && userId
+                                .length > 5)
+                        ) {
+                            // Agent messages
+                            messageType = 'message-agent';
+                            senderName = userFullName || 'Agent';
+
+                        } else if (userId === 'system00') {
+                            // System messages
+                            messageType = 'message-system';
+                            senderName = 'System';
+                            avatarText = 'S';
+                            ignoreData = true;
+                        } else {
+                            // Customer messages (default)
+                            messageType = 'message-customer';
+                            senderName = userFullName || 'Customer';
+
+                            // Special case: if userid starts with 'si' it's likely a customer
+                            if (userId && userId.startsWith('si')) {
+                                senderName = userFullName || 'Customer';
+                                avatarText = senderName.charAt(0).toUpperCase();
+                            }
+                        }
+
+                        let emailHeader = ind == 0 && header != "" ?
+                            `<div class="email-header">${header}</div>` : ''
+
+                        if (!ignoreData) {
+                            // Create message card
+                            const messageCard = $(`
                     <div class="message-card ${messageType}" data-type="${message.type}">
                         <div class="message-header">
                             <div class="message-sender " data-user-id="${userId}">
@@ -880,14 +876,17 @@
                             </div>
                             <div class="message-time">${formatDate(message.datecreated)}</div>
                         </div>
+                        ${emailHeader}
                         <div class="message-content">
                             ${formatMessageContent(message)}
                         </div>
                     </div>
                 `);
 
-                        container.append(messageCard);
-                    }
+                            container.append(messageCard);
+                        }
+
+                    });
 
                 });
 
