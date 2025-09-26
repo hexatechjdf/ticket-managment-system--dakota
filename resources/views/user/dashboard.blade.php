@@ -855,7 +855,7 @@
                     if (!ignoreData) {
                         // Create message card
                         const messageCard = $(`
-                    <div class="message-card ${messageType}">
+                    <div class="message-card ${messageType}" data-type="${message.type}">
                         <div class="message-header">
                             <div class="message-sender " data-user-id="${userId}">
                                 <span class="message-sender-avatar">${avatarText}</span>
