@@ -785,7 +785,7 @@
                 allMessages.forEach(message => {
                   
                     let text = message.message || '';
-                    if (['E1'].includes(message.type) && text=='') {
+                    if (['E1','4','T'].includes(message.type) && text=='') {
                         return;
                     }
                     let isWrappedArrayMessage = /^\[\[.*\]\]$/.test(text);
